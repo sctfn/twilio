@@ -5,4 +5,5 @@ Description=Twilio System Reboot Service
 ExecStart=/usr/bin/python /home/scott/src/twilio/reboot_machine.py
 
 [Install]
+Alias=reboot-machine.service
 WantedBy=multi-user.target

@@ -8,6 +8,7 @@ from a Twilio request.
 import os
 import urllib
 import urllib2
+import httplib
 
 import twilio.twiml
 from flask import Flask, request, redirect
@@ -28,27 +29,33 @@ def rebooter():
     resp = twilio.twiml.Response()
     resp.say('Welcome to reboot')
     with resp.gather(numDigits=1, action='/handle-key', method='POST') as g:
-        for num, machine in sorted(MACHINES.items()):
-            resp.say('To reboot {0}, press {1}.'.format(machine, num))
+        script=' '.join(['To reboot {0}, press {1}.'.format(machine, num)
+                         for num, machine in sorted(MACHINES.items())])
+        g.say(script)
     return str(resp)
 
 @app.route('/handle-key', methods=['GET', 'POST'])
 def handle_key():
     digit_pressed = request.values.get('Digits', None)
     digit = int(digit_pressed)
-
+    resp = twilio.twiml.Response()
+    
     try:
         machine = MACHINES[digit]
         try:
             data = urllib.urlencode({'auth' : 'go'})
             url = 'http://{0}:{1}/'.format(machine, REBOOT_PORT)
             req = urllib2.Request(url, data)
-            response.urllib2.urlopen(req)
-        except urllib2.URLError:
+            urllib2.urlopen(req)
+        except httplib.BadStatusLine:
+            # The server won't return a response since we just told it to reboot
             pass
         resp.say('Reboot signal sent to {0}'.format(machine))
         return str(resp)
-            
+    
     except KeyError:
         resp.say("I'm sorry. That number is not matched to a machine.")
         return redirect('/')
+
+if __name__ == '__main__':
+    app.run(debug=True)

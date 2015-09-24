@@ -51,11 +51,13 @@ def handle_key():
             # The server won't return a response since we just told it to reboot
             pass
         resp.say('Reboot signal sent to {0}'.format(machine))
-        return str(resp)
+        resp.hangup()
     
     except KeyError:
         resp.say("I'm sorry. That number is not matched to a machine.")
-        return redirect('/')
+        resp.redirect('/')
 
+    return str(resp)
+    
 if __name__ == '__main__':
     app.run(debug=True)

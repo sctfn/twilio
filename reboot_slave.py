@@ -7,7 +7,7 @@ app = Flask(__name__)
 def rebooter():
     auth = request.values.get('auth', None)
     if auth == 'go':
-        os.system('reboot')
+        os.system('sudo reboot')
     else:
         return 'Need auth key!'
         
